@@ -12,6 +12,7 @@ class TtsService {
 
   final ValueNotifier<bool> isPlayingNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> currentTextNotifier = ValueNotifier<String>('');
+  VoidCallback? onCompletion;
 
   bool get isPlaying => _isPlaying;
   String get currentSpeakingText => _currentSpeakingText;
@@ -31,6 +32,7 @@ class TtsService {
         _currentSpeakingText = '';
         isPlayingNotifier.value = false;
         currentTextNotifier.value = '';
+        onCompletion?.call();
       });
 
       _flutterTts.setErrorHandler((msg) {

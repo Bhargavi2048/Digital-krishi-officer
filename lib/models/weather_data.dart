@@ -93,4 +93,28 @@ class WeatherData {
   String toJson() => json.encode(toMap());
 
   factory WeatherData.fromJson(String source) => WeatherData.fromMap(json.decode(source));
+
+  WeatherData copyWith({
+    double? temperature,
+    String? condition,
+    int? humidity,
+    double? windSpeed,
+    int? rainProbability,
+    String? locationName,
+    DateTime? lastUpdated,
+    List<DailyForecast>? forecast,
+    String? agriculturalAdvisory,
+  }) {
+    return WeatherData(
+      temperature: temperature ?? this.temperature,
+      condition: condition ?? this.condition,
+      humidity: humidity ?? this.humidity,
+      windSpeed: windSpeed ?? this.windSpeed,
+      rainProbability: rainProbability ?? this.rainProbability,
+      locationName: locationName ?? this.locationName,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      forecast: forecast ?? this.forecast,
+      agriculturalAdvisory: agriculturalAdvisory ?? this.agriculturalAdvisory,
+    );
+  }
 }

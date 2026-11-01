@@ -64,6 +64,7 @@ class WeatherService {
     String cropName = 'Paddy (Rice)',
     double? latitude,
     double? longitude,
+    String langCode = 'en',
   }) async {
     try {
       final double lat;
@@ -86,6 +87,7 @@ class WeatherService {
             lon: lon,
             locationName: locationName,
             cropName: cropName,
+            langCode: langCode,
           );
           if (owmData != null) {
             return owmData;
@@ -142,12 +144,13 @@ class WeatherService {
 
         final rainProb = forecastList.isNotEmpty ? forecastList[0].rainProbability : (precipitation > 0 ? 70 : 20);
 
-        final advisory = _generateAgriculturalAdvisory(
+        final advisory = generateAdvisoryForLanguage(
           temp: temp,
           humidity: humidity,
           rainProb: rainProb,
           windSpeed: windSpeed,
           cropName: cropName,
+          langCode: langCode,
         );
 
         return WeatherData(
@@ -164,7 +167,7 @@ class WeatherService {
     } catch (_) {}
 
     // Resilient offline realistic data
-    return _generateFallbackWeather(locationName, cropName);
+    return _generateFallbackWeather(locationName, cropName, langCode: langCode);
   }
 
   String _mapWeatherCode(int code) {
@@ -180,31 +183,116 @@ class WeatherService {
     return 'Partly Cloudy';
   }
 
-  String _generateAgriculturalAdvisory({
+  String generateAdvisoryForLanguage({
     required double temp,
     required int humidity,
     required int rainProb,
     required double windSpeed,
     required String cropName,
+    String langCode = 'en',
   }) {
     final buffer = StringBuffer();
 
-    if (rainProb >= 50) {
-      buffer.writeln('Rain probability is high ($rainProb%). Avoid unnecessary irrigation today.');
-      buffer.writeln('Notice: If you planned pesticide or fertilizer spraying on $cropName, postpone it by 24-48 hours as rainfall will wash away chemicals and reduce efficacy.');
-    } else if (temp >= 35) {
-      buffer.writeln('High temperature alert ($temp°C). Ensure early morning or late evening light irrigation to prevent moisture stress in $cropName.');
-      buffer.writeln('Tip: Apply organic mulch on soil to conserve root zone moisture.');
+    if (langCode == 'ta') {
+      if (rainProb >= 50) {
+        buffer.writeln('இன்று மழை பெய்ய வாய்ப்பு அதிகம் ($rainProb%). வயலில் தேவையற்ற நீர்ப்பாசனத்தைத் தவிர்க்கவும்.');
+        buffer.writeln('முக்கிய அறிவிப்பு: $cropName பயிருக்கு பூச்சிக்கொல்லி மருந்து அல்லது உரமிடுதல் திட்டமிட்டிருந்தால், மழை மருந்தைக் கழுவிவிடக்கூடும் என்பதால் 24-48 மணி நேரம் தள்ளி வைக்கவும்.');
+      } else if (temp >= 35) {
+        buffer.writeln('அதிக வெப்பநிலை எச்சரிக்கை ($temp°C). $cropName பயிரில் ஈரப்பதம் குறைவதைத் தடுக்க அதிகாலை அல்லது மாலை வேளையில் லேசான நீர்ப்பாசனம் செய்யவும்.');
+        buffer.writeln('விவசாயக் குறிப்பு: வேர் மண்டல ஈரப்பதத்தைப் பாதுகாக்க இயற்கை மூடாக்கு (பயிர் கழிவுகள்) இடவும்.');
+      } else {
+        buffer.writeln('வானிலை வழக்கமான களப்பணிகள், உழவு மற்றும் பயிர் பராமரிப்புக்கு சாதகமாக உள்ளது.');
+      }
+
+      if (humidity >= 75) {
+        buffer.writeln('அதிக காற்று ஈரப்பதம் ($humidity%) பூஞ்சை நோய்களை (சாம்பல் நோய் மற்றும் இலைக்கருகல்) உருவாக்கலாம். பயிரின் கீழ் இலைகளைத் தீவிரமாகக் கண்காணிக்கவும்.');
+      }
+
+      if (windSpeed >= 20) {
+        buffer.writeln('வேகமான காற்று வீசுகிறது ($windSpeed கி.மீ/மணி). மருந்து தெளிப்பதைத் தவிர்க்கவும், இல்லையெனில் மருந்து காற்றில் விரயமாகும்.');
+      }
+    } else if (langCode == 'hi') {
+      if (rainProb >= 50) {
+        buffer.writeln('बारिश की संभावना अधिक है ($rainProb%)। आज फसलों की अनावश्यक सिंचाई से बचें।');
+        buffer.writeln('महत्वपूर्ण सूचना: यदि आपने $cropName पर कीटनाशक या खाद का छिड़काव तय किया है, तो बारिश के कारण दवा धुलने से बचाने के लिए इसे 24-48 घंटे टाल दें।');
+      } else if (temp >= 35) {
+        buffer.writeln('उच्च तापमान की चेतावनी ($temp°C)। $cropName में नमी बनाए रखने के लिए सुबह या शाम को हल्की सिंचाई करें।');
+        buffer.writeln('सलाह: जड़ों में नमी संरक्षण के लिए जैविक मल्चिंग का उपयोग करें।');
+      } else {
+        buffer.writeln('मौसम सामान्य कृषि कार्यों, निराई-गुड़ाई और कटाई के लिए पूरी तरह अनुकूल है।');
+      }
+
+      if (humidity >= 75) {
+        buffer.writeln('हवा में उच्च आर्द्रता ($humidity%) से फफूंद जनित रोगों (झुलसा व पाउडरी मिल्ड्यू) का खतरा बढ़ सकता है। निचली पत्तियों की निगरानी करें।');
+      }
+
+      if (windSpeed >= 20) {
+        buffer.writeln('तेज हवाएं ($windSpeed किमी/घंटा) चल रही हैं। पत्तों पर किसी भी प्रकार के छिड़काव से बचें।');
+      }
+    } else if (langCode == 'te') {
+      if (rainProb >= 50) {
+        buffer.writeln('వర్షం కురిసే అవకాశం ఎక్కువగా ఉంది ($rainProb%). ఈ రోజు అనవసరపు నీటిపారుదలని నివారించండి.');
+        buffer.writeln('గమనిక: $cropName పై పురుగుమందులు లేదా ఎరువులు పిచికారీ చేయాలనుకుంటే 24-48 గంటలు వాయిదా వేయండి.');
+      } else if (temp >= 35) {
+        buffer.writeln('అధిక ఉష్ణోగ్రత హెచ్చరిక ($temp°C). తేమ తగ్గకుండా ఉదయం లేదా సాయంత్రం వేళల్లో తేలికపాటి నీరు పెట్టండి.');
+      } else {
+        buffer.writeln('సాధారణ పంట పనులకు మరియు కోతలకు వాతావరణం అనుకూలంగా ఉంది.');
+      }
+      if (humidity >= 75) {
+        buffer.writeln('అధిక తేమ ($humidity%) వల్ల శిలీంధ్ర వ్యాధులు వచ్చే అవకాశం ఉంది. దిగువ ఆకులను గమనించండి.');
+      }
+      if (windSpeed >= 20) {
+        buffer.writeln('ఈదురు గాలులు ($windSpeed కి.மீ/గం) వీస్తున్నాయి. స్ప్రేయింగ్ చేయవద్దు.');
+      }
+    } else if (langCode == 'kn') {
+      if (rainProb >= 50) {
+        buffer.writeln('ಮಳೆಯ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ ($rainProb%). ಇಂದು ಬೆಳೆಗಳಿಗೆ ಅನಗತ್ಯ ನೀರಾವರಿಯನ್ನು ತಪ್ಪಿಸಿ.');
+        buffer.writeln('ಸೂಚನೆ: $cropName ಬೆಳೆಗೆ ಕೀಟನಾಶಕ ಸಿಂಪಡಣೆಯನ್ನು 24-48 ಗಂಟೆ ಮುಂದೂಡಿ.');
+      } else if (temp >= 35) {
+        buffer.writeln('ಹೆಚ್ಚಿನ ತಾಪಮಾನದ ಎಚ್ಚರಿಕೆ ($temp°C). ತೇವಾಂಶ ಕಾಪಾಡಲು ಬೆಳಗಿನ ಜಾವ ಅಥವಾ ಸಂಜೆ ಲಘು ನೀರಾವರಿ ಮಾಡಿ.');
+      } else {
+        buffer.writeln('ಸಾಮಾನ್ಯ ಕೃಷಿ ಕೆಲಸಗಳಿಗೆ ಹವಾಮಾನ ಅನುಕೂಲಕರವಾಗಿದೆ.');
+      }
+      if (humidity >= 75) {
+        buffer.writeln('ಹೆಚ್ಚಿನ ತೇವಾಂಶ ($humidity%) ಶಿಲೀಂಧ್ರ ರೋಗಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ಎಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.');
+      }
+      if (windSpeed >= 20) {
+        buffer.writeln('ವೇಗದ ಗಾಳಿ ($windSpeed km/h) ಬೀಸುತ್ತಿದೆ. ಔಷಧ ಸಿಂಪಡಿಸಬೇಡಿ.');
+      }
+    } else if (langCode == 'ml') {
+      if (rainProb >= 50) {
+        buffer.writeln('മഴയ്ക്ക് സാധ്യത കൂടുതലാണ് ($rainProb%). ഇന്ന് അനാവശ്യ ജലസೇചനം ഒഴിവാക്കുക.');
+        buffer.writeln('ശ്രദ്ധിക്കുക: $cropName വിളയിൽ കീടനാശിനി പ്രയോഗം 24-48 മണിക്കൂർ മാറ്റിവെക്കുക.');
+      } else if (temp >= 35) {
+        buffer.writeln('ഉയർന്ന താപനില മുന്നറിയിപ്പ് ($temp°C). ഈർപ്പം നിലനിർത്താൻ അതിരാവിലെയോ വൈകുന്നേരമോ നേരിയ നന നൽകുക.');
+      } else {
+        buffer.writeln('സാധാരണ കാർഷിക ജോലികൾക്ക് കാലാവസ്ഥ അനുകൂലമാണ്.');
+      }
+      if (humidity >= 75) {
+        buffer.writeln('കൂടിയ ഈർപ്പം ($humidity%) കുമിൾ രോഗങ്ങൾക്ക് കാരണമാകാം. இലകൾ പരിശോധിക്കുക.');
+      }
+      if (windSpeed >= 20) {
+        buffer.writeln('ശക്തമായ കാറ്റ് ($windSpeed km/h) വീശുന്നു. സ്പ്രേ ചെയ്യുന്നത് ഒഴിവാക്കുക.');
+      }
     } else {
-      buffer.writeln('Weather conditions are favorable for regular intercultural operations and harvesting.');
-    }
+      // English (default)
+      if (rainProb >= 50) {
+        buffer.writeln('Rain probability is high ($rainProb%). Avoid unnecessary irrigation today.');
+        buffer.writeln('Notice: If you planned pesticide or fertilizer spraying on $cropName, postpone it by 24-48 hours as rainfall will wash away chemicals and reduce efficacy.');
+      } else if (temp >= 35) {
+        buffer.writeln('High temperature alert ($temp°C). Ensure early morning or late evening light irrigation to prevent moisture stress in $cropName.');
+        buffer.writeln('Tip: Apply organic mulch on soil to conserve root zone moisture.');
+      } else {
+        buffer.writeln('Weather conditions are favorable for regular intercultural operations and harvesting.');
+      }
 
-    if (humidity >= 75) {
-      buffer.writeln('High atmospheric humidity ($humidity%) increases susceptibility to fungal diseases (mildew & blight). Inspect lower leaves.');
-    }
+      if (humidity >= 75) {
+        buffer.writeln('High atmospheric humidity ($humidity%) increases susceptibility to fungal diseases (mildew & blight). Inspect lower leaves.');
+      }
 
-    if (windSpeed >= 20) {
-      buffer.writeln('Strong winds detected ($windSpeed km/h). Do not perform foliar dusting or spray operations to prevent chemical drift.');
+      if (windSpeed >= 20) {
+        buffer.writeln('Strong winds detected ($windSpeed km/h). Do not perform foliar dusting or spray operations to prevent chemical drift.');
+      }
     }
 
     return buffer.toString().trim();
@@ -256,17 +344,26 @@ class WeatherService {
     return alerts;
   }
 
-  WeatherData _generateFallbackWeather(String locationName, String cropName) {
+  WeatherData _generateFallbackWeather(String locationName, String cropName, {String langCode = 'en'}) {
     final now = DateTime.now();
     final forecastList = [
       DailyForecast(date: now, maxTemp: 32.0, minTemp: 24.0, condition: 'Partly Cloudy', rainProbability: 25),
       DailyForecast(date: now.add(const Duration(days: 1)), maxTemp: 31.0, minTemp: 23.5, condition: 'Rain Showers', rainProbability: 65),
-      DailyForecast(date: now.add(const Duration(days: 2)), maxTemp: 30.5, minTemp: 23.0, condition: 'Light Drizzle', rainProbability: 40),
+      DailyForecast(date: now.add(const Duration(days: 2)), maxTemp: 30.5, minTemp: 23.0, condition: 'Drizzle', rainProbability: 40),
       DailyForecast(date: now.add(const Duration(days: 3)), maxTemp: 32.5, minTemp: 24.0, condition: 'Clear Sky', rainProbability: 10),
       DailyForecast(date: now.add(const Duration(days: 4)), maxTemp: 33.0, minTemp: 24.5, condition: 'Clear Sky', rainProbability: 10),
       DailyForecast(date: now.add(const Duration(days: 5)), maxTemp: 33.5, minTemp: 25.0, condition: 'Partly Cloudy', rainProbability: 20),
       DailyForecast(date: now.add(const Duration(days: 6)), maxTemp: 32.0, minTemp: 24.0, condition: 'Partly Cloudy', rainProbability: 30),
     ];
+
+    final advisory = generateAdvisoryForLanguage(
+      temp: 31.5,
+      humidity: 72,
+      rainProb: 25,
+      windSpeed: 14.2,
+      cropName: cropName,
+      langCode: langCode,
+    );
 
     return WeatherData(
       temperature: 31.5,
@@ -276,9 +373,7 @@ class WeatherService {
       rainProbability: 25,
       locationName: locationName,
       forecast: forecastList,
-      agriculturalAdvisory: 'Rain expected tomorrow (65% chance). Avoid scheduled irrigation today.\n\n'
-          'Notice: If you planned pesticide spraying on $cropName, postpone it as rain reduces effectiveness.\n\n'
-          'Moderate humidity (72%) requires inspecting lower foliage for early blight.',
+      agriculturalAdvisory: advisory,
     );
   }
 
@@ -288,6 +383,7 @@ class WeatherService {
     required double lon,
     required String locationName,
     required String cropName,
+    String langCode = 'en',
   }) async {
     try {
       final key = apiKey;
@@ -389,12 +485,13 @@ class WeatherService {
         }
       }
 
-      final advisory = _generateAgriculturalAdvisory(
+      final advisory = generateAdvisoryForLanguage(
         temp: temp,
         humidity: humidity,
         rainProb: currentRainProb,
         windSpeed: windSpeed,
         cropName: cropName,
+        langCode: langCode,
       );
 
       return WeatherData(

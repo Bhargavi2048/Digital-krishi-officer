@@ -218,4 +218,133 @@ class AppTheme {
       ),
     );
   }
+
+  // High-Contrast Outdoor Field Theme (Maximum sunlight visibility in open fields)
+  static ThemeData get outdoorTheme {
+    const Color outdoorBg = Color(0xFF000000);
+    const Color outdoorCard = Color(0xFF0D0D0D);
+    const Color outdoorYellow = Color(0xFFFFD600);
+    const Color outdoorGreen = Color(0xFF00E676);
+    const Color outdoorWhite = Color(0xFFFFFFFF);
+
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: outdoorYellow,
+        onPrimary: Color(0xFF000000),
+        secondary: outdoorGreen,
+        onSecondary: Color(0xFF000000),
+        tertiary: outdoorYellow,
+        onTertiary: Color(0xFF000000),
+        error: Color(0xFFFF1744),
+        onError: outdoorWhite,
+        surface: outdoorCard,
+        onSurface: outdoorWhite,
+      ),
+    );
+
+    return base.copyWith(
+      scaffoldBackgroundColor: outdoorBg,
+      textTheme: GoogleFonts.poppinsTextTheme(base.textTheme).copyWith(
+        titleLarge: GoogleFonts.poppins(
+          fontWeight: FontWeight.w800,
+          color: outdoorWhite,
+          fontSize: 20,
+        ),
+        headlineMedium: GoogleFonts.poppins(
+          fontWeight: FontWeight.w800,
+          color: outdoorYellow,
+          fontSize: 24,
+        ),
+        bodyLarge: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: outdoorWhite,
+          height: 1.45,
+        ),
+        bodyMedium: GoogleFonts.poppins(
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+          color: outdoorWhite,
+          height: 1.4,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: outdoorBg,
+        foregroundColor: outdoorYellow,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: GoogleFonts.poppins(
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          color: outdoorYellow,
+        ),
+        iconTheme: const IconThemeData(color: outdoorYellow),
+      ),
+      cardTheme: CardThemeData(
+        color: outdoorCard,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: outdoorYellow, width: 2.2),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: outdoorYellow,
+          foregroundColor: Colors.black,
+          minimumSize: const Size.fromHeight(54),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: outdoorYellow,
+          minimumSize: const Size.fromHeight(52),
+          side: const BorderSide(color: outdoorYellow, width: 2.2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: outdoorCard,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: outdoorYellow, width: 2.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: outdoorYellow, width: 2.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: outdoorGreen, width: 2.5),
+        ),
+        labelStyle: const TextStyle(color: outdoorYellow, fontSize: 15, fontWeight: FontWeight.bold),
+        hintStyle: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 14),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: outdoorBg,
+        selectedItemColor: outdoorYellow,
+        unselectedItemColor: outdoorWhite,
+        type: BottomNavigationBarType.fixed,
+        elevation: 12,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.5),
+      ),
+    );
+  }
 }

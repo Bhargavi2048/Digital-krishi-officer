@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/weather_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../app/routes.dart';
 
@@ -68,6 +69,11 @@ class LanguageSelectionScreen extends StatelessWidget {
                       child: ListTile(
                         onTap: () async {
                           await langProvider.setLanguage(code);
+                          if (context.mounted) {
+                            try {
+                              Provider.of<WeatherProvider>(context, listen: false).updateLanguage(code);
+                            } catch (_) {}
+                          }
                           if (!isFromSettings) {
                             if (!context.mounted) return;
                             Navigator.pushReplacementNamed(context, AppRoutes.register);

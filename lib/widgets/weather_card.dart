@@ -130,7 +130,7 @@ class WeatherCard extends StatelessWidget {
                           Icon(_getWeatherIcon(weather!.condition), color: Colors.amberAccent, size: 15),
                           const SizedBox(width: 4),
                           Text(
-                            weather!.condition,
+                            context.tr(weather!.condition),
                             style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
                           ),
                         ],

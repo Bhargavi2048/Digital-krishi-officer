@@ -9,6 +9,7 @@ class SpeechService {
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isInitialized = false;
   bool _isListening = false;
+  Function(String status)? onStatusListener;
 
   bool get isListening => _isListening;
   bool get isAvailable => _isInitialized;
@@ -20,12 +21,14 @@ class SpeechService {
         onError: (val) {
           debugPrint('Speech error: $val');
           _isListening = false;
+          onStatusListener?.call('error');
         },
         onStatus: (val) {
           debugPrint('Speech status: $val');
           if (val == 'done' || val == 'notListening') {
             _isListening = false;
           }
+          onStatusListener?.call(val);
         },
       );
     } catch (e) {
@@ -49,6 +52,8 @@ class SpeechService {
   Future<void> startListening({
     required Function(String text) onResult,
     required String langCode,
+    Duration? pauseFor,
+    Duration? listenFor,
   }) async {
     final available = await init();
     if (!available) {
@@ -68,6 +73,8 @@ class SpeechService {
         listenMode: stt.ListenMode.confirmation,
         cancelOnError: false,
         partialResults: true,
+        pauseFor: pauseFor ?? const Duration(seconds: 3),
+        listenFor: listenFor ?? const Duration(seconds: 30),
       );
     } catch (e) {
       debugPrint('Speech listen error: $e');

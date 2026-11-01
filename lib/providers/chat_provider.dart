@@ -88,7 +88,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // --- SEND MESSAGE (TEXT / IMAGE / VIDEO) ---
-  Future<void> sendMessage({
+  Future<String?> sendMessage({
     required String text,
     FarmerProfile? profile,
     String langCode = 'en',
@@ -105,7 +105,7 @@ class ChatProvider extends ChangeNotifier {
     final effectiveBytes = imageBytes ?? videoBytes;
     final isVideo = isVideoFrame || (videoBytes != null) || (videoPath != null);
 
-    if (text.trim().isEmpty && imagePath == null && effectiveBytes == null && videoPath == null) return;
+    if (text.trim().isEmpty && imagePath == null && effectiveBytes == null && videoPath == null) return null;
 
     final userMsg = ChatMessage(
       id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
@@ -129,6 +129,8 @@ class ChatProvider extends ChangeNotifier {
 
     await _storage.saveMessages(_currentConversationId, _messages);
 
+    String? generatedResponse;
+
     try {
       final detectedMime = mimeType ??
           (isVideo
@@ -148,6 +150,8 @@ class ChatProvider extends ChangeNotifier {
           notifyListeners();
         },
       );
+
+      generatedResponse = aiResponseText;
 
       final aiMsg = ChatMessage(
         id: 'msg_ai_${DateTime.now().millisecondsSinceEpoch}',
@@ -180,6 +184,7 @@ class ChatProvider extends ChangeNotifier {
       _thinkingStatus = null;
       notifyListeners();
     }
+    return generatedResponse;
   }
 
   // --- RETRY LAST USER MESSAGE ---

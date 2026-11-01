@@ -41,8 +41,8 @@ class DigitalKrishiOfficerApp extends StatelessWidget {
           return MaterialApp(
             title: 'Digital Krishi Officer',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: themeProv.isOutdoorMode ? AppTheme.outdoorTheme : AppTheme.lightTheme,
+            darkTheme: themeProv.isOutdoorMode ? AppTheme.outdoorTheme : AppTheme.darkTheme,
             themeMode: themeProv.themeMode,
             locale: langProv.currentLocale,
             supportedLocales: const [

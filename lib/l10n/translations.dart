@@ -239,6 +239,36 @@ class Translations {
       'offlineMsg': 'Internet connection required. Please reconnect and try again.',
       'emptyData': 'No records available.',
       'loading': 'Loading...',
+
+      // Theme & Outdoor Mode
+      'themeSetting': 'Theme Mode',
+      'themeLight': 'Light Mode',
+      'themeDark': 'Dark Mode',
+      'themeOutdoor': 'Outdoor Mode',
+      'themeOutdoorDesc': 'Ultra high-contrast field mode for direct sunlight visibility',
+
+      // Hands-Free Conversational Voice
+      'handsFreeVoice': 'Continuous Voice Conversation',
+      'handsFreeActive': 'Hands-Free Voice Active',
+      'handsFreeListening': 'Listening... Speak now',
+      'handsFreeThinking': 'Krishi Officer is preparing advice...',
+      'handsFreeSpeaking': 'Speaking agricultural advice...',
+      'handsFreeStop': 'Stop Hands-Free',
+      'handsFreeTapToSpeak': 'Tap mic to resume speaking',
+      'startHandsFree': 'Start Hands-Free Voice',
+
+      // Weather & Advisory
+      'defaultAdvisory': 'Favorable field conditions today. Maintain scheduled irrigation and inspect foliage for early pest symptoms.',
+      'Clear Sky': 'Clear Sky',
+      'Partly Cloudy': 'Partly Cloudy',
+      'Overcast': 'Overcast',
+      'Foggy': 'Foggy',
+      'Drizzle': 'Drizzle',
+      'Rain Showers': 'Rain Showers',
+      'Heavy Showers': 'Heavy Showers',
+      'Thunderstorm': 'Thunderstorm',
+      'Sunny': 'Sunny',
+      'Rain': 'Rain',
     },
 
     'ta': {
@@ -480,6 +510,36 @@ class Translations {
       'offlineMsg': 'இணைய இணைப்பு தேவை. மீண்டும் முயற்சிக்கவும்.',
       'emptyData': 'பதிவுகள் எதுவும் இல்லை.',
       'loading': 'ஏற்றுகிறது...',
+
+      // Theme & Outdoor Mode
+      'themeSetting': 'வடிவமைப்பு முறை',
+      'themeLight': 'பகல் முறை',
+      'themeDark': 'இரவு முறை',
+      'themeOutdoor': 'வெளிக்கள முறை',
+      'themeOutdoorDesc': 'சூரிய ஒளியில் மிகத் தெளிவாகக் காண உதவும் அதிக மாறுபட்ட முறை',
+
+      // Hands-Free Conversational Voice
+      'handsFreeVoice': 'தொடர் குரல் உரையாடல்',
+      'handsFreeActive': 'தொடர் குரல் உரையாடல் இயங்குகிறது',
+      'handsFreeListening': 'கேட்கிறது... இப்போது உங்கள் கேள்வியைப் பேசுங்கள்',
+      'handsFreeThinking': 'வேளாண் அதிகாரி ஆலோசனை தயாரிக்கிறார்...',
+      'handsFreeSpeaking': 'பதிலை குரலில் வாசிக்கிறது...',
+      'handsFreeStop': 'குரல் உரையாடலை நிறுத்து',
+      'handsFreeTapToSpeak': 'மீண்டும் பேச மைக்ரோஃபோனைத் தொடவும்',
+      'startHandsFree': 'தொடர் குரல் உரையாடலைத் தொடங்கு',
+
+      // Weather & Advisory
+      'defaultAdvisory': 'இன்று வயல் பணிகள் மேற்கொள்ள வானிலை சாதகமாக உள்ளது. வழக்கமான பாசனத்தைப் பராமரித்து இலைகளில் பூச்சி அறிகுறிகள் உள்ளதா எனக் கண்காணிக்கவும்.',
+      'Clear Sky': 'தெளிவான வானம்',
+      'Partly Cloudy': 'பகுதி மேகமூட்டம்',
+      'Overcast': 'முழு மேகமூட்டம்',
+      'Foggy': 'பனிமூட்டம்',
+      'Drizzle': 'தூறல்',
+      'Rain Showers': 'மழைப்பொழிவு',
+      'Heavy Showers': 'கனமழை',
+      'Thunderstorm': 'இடி மின்னலுடன் மழை',
+      'Sunny': 'வெயில்',
+      'Rain': 'மழை',
     },
 
     'hi': {
@@ -537,6 +597,36 @@ class Translations {
       'prescriptionSlip': 'दुकानदार के लिए दवा पर्ची',
       'shareMandiRate': 'मंडी भाव साझा करें',
       'shareReport': 'रिपोर्ट साझा करें',
+
+      // Theme & Outdoor Mode
+      'themeSetting': 'थीम मोड',
+      'themeLight': 'लाइट मोड',
+      'themeDark': 'डार्क मोड',
+      'themeOutdoor': 'आउटडोर मोड',
+      'themeOutdoorDesc': 'तेज धूप में स्पष्ट दिखने के लिए हाई-कंट्रास्ट मोड',
+
+      // Hands-Free Conversational Voice
+      'handsFreeVoice': 'लगातार बातचीत मोड',
+      'handsFreeActive': 'हैंड्स-फ्री बातचीत जारी है',
+      'handsFreeListening': 'सुन रहे हैं... कृपया अपना सवाल बोलें',
+      'handsFreeThinking': 'कृषि अधिकारी सलाह तैयार कर रहे हैं...',
+      'handsFreeSpeaking': 'सलाह बोलकर सुनाई जा रही है...',
+      'handsFreeStop': 'बातचीत बंद करें',
+      'handsFreeTapToSpeak': 'फिर से बोलने के लिए माइक दबाएं',
+      'startHandsFree': 'हैंड्स-फ्री बातचीत शुरू करें',
+
+      // Weather & Advisory
+      'defaultAdvisory': 'आज खेत के कार्यों के लिए मौसम अनुकूल है। नियमित सिंचाई जारी रखें और कीटों के लक्षणों की जांच करें।',
+      'Clear Sky': 'साफ आसमान',
+      'Partly Cloudy': 'आंशिक रूप से बादल',
+      'Overcast': 'घने बादल',
+      'Foggy': 'कोहरा',
+      'Drizzle': 'हल्की बूंदाबांदी',
+      'Rain Showers': 'बारिश की बौछारें',
+      'Heavy Showers': 'भारी बारिश',
+      'Thunderstorm': 'गरज के साथ बारिश',
+      'Sunny': 'धूप',
+      'Rain': 'बारिश',
     },
     'te': {
       'appName': 'డిజిటల్ కృషి అధికారి',

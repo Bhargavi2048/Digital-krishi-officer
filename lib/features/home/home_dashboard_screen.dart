@@ -50,6 +50,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final cropProv = Provider.of<CropProvider>(context);
     final alertProv = Provider.of<AlertProvider>(context);
 
+    final langProv = Provider.of<LanguageProvider>(context);
+
+    if (weather.currentLanguageCode != langProv.currentLanguageCode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        weather.updateLanguage(langProv.currentLanguageCode);
+      });
+    }
+
     final farmerName = auth.currentUser?.fullName.isNotEmpty == true
         ? (auth.isGuest ? context.tr('guestFarmer') : auth.currentUser!.fullName)
         : context.tr('farmer');
@@ -63,9 +71,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             : 'Chennai, Tamil Nadu');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0.5,
         leading: Padding(
           padding: const EdgeInsets.only(left: 10),
@@ -127,6 +135,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         _showAllLanguagesSheet(context);
                       } else {
                         langProv.setLanguage(val);
+                        Provider.of<WeatherProvider>(context, listen: false).updateLanguage(val);
                       }
                     },
                     itemBuilder: (ctx) => [
@@ -675,6 +684,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                             : null,
                         onTap: () {
                           langProv.setLanguage(code);
+                          Provider.of<WeatherProvider>(context, listen: false).updateLanguage(code);
                           Navigator.pop(ctx);
                         },
                       );

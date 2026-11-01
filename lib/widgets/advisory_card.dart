@@ -16,16 +16,23 @@ class AdvisoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fallback = context.tr('defaultAdvisory');
+    final effectiveText = advisoryText.trim().isNotEmpty ? advisoryText : fallback;
+
     return Card(
-      elevation: 1,
+      elevation: isDark ? 2 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: const Color(0xFF2E7D32).withOpacity(0.2)),
+        side: isDark
+            ? BorderSide(color: theme.colorScheme.primary.withOpacity(0.5), width: 1.5)
+            : BorderSide(color: const Color(0xFF2E7D32).withOpacity(0.2)),
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFFF1F8E9),
+          color: isDark ? (theme.cardTheme.color ?? const Color(0xFF1B281D)) : const Color(0xFFF1F8E9),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -36,12 +43,12 @@ class AdvisoryCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32).withOpacity(0.12),
+                    color: theme.colorScheme.primary.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.eco,
-                    color: Color(0xFF2E7D32),
+                    color: theme.colorScheme.primary,
                     size: 20,
                   ),
                 ),
@@ -49,10 +56,10 @@ class AdvisoryCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     context.tr('todayAdvisory'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1B5E20),
+                      color: isDark ? theme.colorScheme.primary : const Color(0xFF1B5E20),
                     ),
                   ),
                 ),
@@ -60,13 +67,11 @@ class AdvisoryCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              advisoryText.isNotEmpty
-                  ? advisoryText
-                  : 'Favorable field conditions today. Maintain scheduled irrigation and inspect foliage for early pest symptoms.',
-              style: const TextStyle(
+              effectiveText,
+              style: TextStyle(
                 fontSize: 13.5,
                 height: 1.45,
-                color: Color(0xFF2E3D30),
+                color: isDark ? Colors.white : const Color(0xFF2E3D30),
               ),
             ),
             const SizedBox(height: 12),
@@ -77,9 +82,6 @@ class AdvisoryCard extends StatelessWidget {
                   child: ValueListenableBuilder<bool>(
                     valueListenable: TtsService().isPlayingNotifier,
                     builder: (context, isPlaying, _) {
-                      final effectiveText = advisoryText.isNotEmpty
-                          ? advisoryText
-                          : 'Favorable field conditions today. Maintain scheduled irrigation and inspect foliage for early pest symptoms.';
                       final currentText = TtsService().currentTextNotifier.value;
                       final isThisSpeaking = isPlaying && currentText == effectiveText;
                       return TextButton.icon(
@@ -94,7 +96,7 @@ class AdvisoryCard extends StatelessWidget {
                         icon: Icon(
                           isThisSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
                           size: 16,
-                          color: isThisSpeaking ? Colors.red.shade700 : const Color(0xFF2E7D32),
+                          color: isThisSpeaking ? Colors.red.shade400 : theme.colorScheme.primary,
                         ),
                         label: Text(
                           isThisSpeaking ? context.tr('stopVoice') : context.tr('listenAdvisory'),
@@ -103,11 +105,13 @@ class AdvisoryCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.bold,
-                            color: isThisSpeaking ? Colors.red.shade700 : const Color(0xFF2E7D32),
+                            color: isThisSpeaking ? Colors.red.shade400 : theme.colorScheme.primary,
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          backgroundColor: isThisSpeaking ? Colors.red.shade50 : const Color(0xFF2E7D32).withValues(alpha: 0.08),
+                          backgroundColor: isThisSpeaking
+                              ? Colors.red.withOpacity(0.15)
+                              : theme.colorScheme.primary.withOpacity(0.1),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           visualDensity: VisualDensity.compact,
@@ -121,15 +125,15 @@ class AdvisoryCard extends StatelessWidget {
                   Flexible(
                     child: TextButton.icon(
                       onPressed: onAskAi,
-                      icon: const Icon(Icons.auto_awesome, size: 14, color: Color(0xFF2E7D32)),
+                      icon: Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
                       label: Text(
                         context.tr('askAi'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E7D32),
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       style: TextButton.styleFrom(

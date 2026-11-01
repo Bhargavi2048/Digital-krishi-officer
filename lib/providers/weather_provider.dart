@@ -13,20 +13,32 @@ class WeatherProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String _currentLocationName = 'Thanjavur, Tamil Nadu';
+  String _langCode = 'en';
 
   WeatherData? get weatherData => _weatherData;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get currentLocationName => _currentLocationName;
+  String get currentLanguageCode => _langCode;
 
   WeatherProvider() {
+    _langCode = _storage.getLanguage();
     final storedUser = _storage.getUser();
     loadWeather(profile: storedUser);
   }
 
-  Future<void> loadWeather({FarmerProfile? profile, double? latitude, double? longitude, bool resetToProfile = false}) async {
+  Future<void> loadWeather({
+    FarmerProfile? profile,
+    double? latitude,
+    double? longitude,
+    bool resetToProfile = false,
+    String? langCode,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
+    if (langCode != null && langCode.isNotEmpty) {
+      _langCode = langCode;
+    }
     notifyListeners();
 
     final activeProfile = profile ?? _storage.getUser();
@@ -50,6 +62,7 @@ class WeatherProvider extends ChangeNotifier {
         cropName: activeProfile?.mainCrop ?? 'Paddy',
         latitude: latitude,
         longitude: longitude,
+        langCode: _langCode,
       );
       _weatherData = data;
 
@@ -65,6 +78,25 @@ class WeatherProvider extends ChangeNotifier {
       _errorMessage = 'Could not load weather: $e';
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  void updateLanguage(String newLangCode) {
+    if (_langCode != newLangCode) {
+      _langCode = newLangCode;
+      if (_weatherData != null) {
+        final activeProfile = _storage.getUser();
+        final updatedAdvisory = _weatherService.generateAdvisoryForLanguage(
+          temp: _weatherData!.temperature,
+          humidity: _weatherData!.humidity,
+          rainProb: _weatherData!.rainProbability,
+          windSpeed: _weatherData!.windSpeed,
+          cropName: activeProfile?.mainCrop ?? 'Paddy',
+          langCode: newLangCode,
+        );
+        _weatherData = _weatherData!.copyWith(agriculturalAdvisory: updatedAdvisory);
+        notifyListeners();
+      }
     }
   }
 
