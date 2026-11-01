@@ -82,21 +82,19 @@ class WeatherProvider extends ChangeNotifier {
   }
 
   void updateLanguage(String newLangCode) {
-    if (_langCode != newLangCode) {
-      _langCode = newLangCode;
-      if (_weatherData != null) {
-        final activeProfile = _storage.getUser();
-        final updatedAdvisory = _weatherService.generateAdvisoryForLanguage(
-          temp: _weatherData!.temperature,
-          humidity: _weatherData!.humidity,
-          rainProb: _weatherData!.rainProbability,
-          windSpeed: _weatherData!.windSpeed,
-          cropName: activeProfile?.mainCrop ?? 'Paddy',
-          langCode: newLangCode,
-        );
-        _weatherData = _weatherData!.copyWith(agriculturalAdvisory: updatedAdvisory);
-        notifyListeners();
-      }
+    _langCode = newLangCode;
+    if (_weatherData != null) {
+      final activeProfile = _storage.getUser();
+      final updatedAdvisory = _weatherService.generateAdvisoryForLanguage(
+        temp: _weatherData!.temperature,
+        humidity: _weatherData!.humidity,
+        rainProb: _weatherData!.rainProbability,
+        windSpeed: _weatherData!.windSpeed,
+        cropName: activeProfile?.mainCrop ?? 'Paddy',
+        langCode: newLangCode,
+      );
+      _weatherData = _weatherData!.copyWith(agriculturalAdvisory: updatedAdvisory);
+      notifyListeners();
     }
   }
 

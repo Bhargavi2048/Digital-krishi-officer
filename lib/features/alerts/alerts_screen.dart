@@ -123,14 +123,14 @@ class AlertsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: const Color(0xFFA5D6A7)),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
-                        const Icon(Icons.cell_tower, color: Color(0xFF2E7D32), size: 24),
-                        const SizedBox(width: 10),
+                        Icon(Icons.cell_tower, color: Color(0xFF2E7D32), size: 24),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               Text(
                                 'Live WhatsApp Push Alert Dispatcher',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1B5E20)),

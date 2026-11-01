@@ -19,7 +19,7 @@ class TtsService {
 
   Future<void> init() async {
     try {
-      await _flutterTts.setSpeechRate(0.5);
+      await _flutterTts.setSpeechRate(0.48);
       await _flutterTts.setPitch(1.0);
 
       _flutterTts.setStartHandler(() {
@@ -58,11 +58,67 @@ class TtsService {
     }
   }
 
-  Future<void> speak(String text, {String langCode = 'en', double speed = 0.5}) async {
+  /// Expands symbols and removes non-phonetic punctuation so Indic TTS engines
+  /// never stall or stop prematurely on symbols like %, °C, ( ), :, etc.
+  String _prepareTextForSpeech(String text, String langCode) {
+    String cleaned = text
+        .replaceAll(RegExp(r'[*#_`>~]'), '')
+        .replaceAll(RegExp(r'\[.*?\]\(.*?\)'), '')
+        .replaceAll(RegExp(r'[\(\)]'), ' ')
+        .replaceAll(':', ', ')
+        .replaceAll(';', ', ');
+
+    if (langCode == 'ta') {
+      cleaned = cleaned
+          .replaceAll('%', ' சதவீதம் ')
+          .replaceAll('°C', ' டிகிரி செல்சியஸ் ')
+          .replaceAll('km/h', ' கிலோமீட்டர் மணி ')
+          .replaceAll('கி.மீ/மணி', ' கிலோமீட்டர் மணி ')
+          .replaceAll('/', ' அல்லது ');
+    } else if (langCode == 'hi') {
+      cleaned = cleaned
+          .replaceAll('%', ' प्रतिशत ')
+          .replaceAll('°C', ' डिग्री सेल्सियस ')
+          .replaceAll('km/h', ' किलोमीटर प्रति घंटा ')
+          .replaceAll('किमी/घंटा', ' किलोमीटर प्रति घंटा ')
+          .replaceAll('/', ' या ');
+    } else if (langCode == 'te') {
+      cleaned = cleaned
+          .replaceAll('%', ' శాతం ')
+          .replaceAll('°C', ' డిగ్రీ సెల్సియస్ ')
+          .replaceAll('కి.మీ/గం', ' కిలోమీటర్లు గంట ')
+          .replaceAll('/', ' లేదా ');
+    } else if (langCode == 'kn') {
+      cleaned = cleaned
+          .replaceAll('%', ' ಪ್ರತಿಶತ ')
+          .replaceAll('°C', ' ಡಿಗ್ರಿ ಸೆಲ್ಸಿಯಸ್ ')
+          .replaceAll('/', ' ಅಥವಾ ');
+    } else if (langCode == 'ml') {
+      cleaned = cleaned
+          .replaceAll('%', ' ശതമാനം ')
+          .replaceAll('°C', ' ഡിഗ്രി സെൽഷ്യസ് ')
+          .replaceAll('/', ' അല്ലെങ്കിൽ ');
+    } else {
+      cleaned = cleaned
+          .replaceAll('%', ' percent ')
+          .replaceAll('°C', ' degrees Celsius ')
+          .replaceAll('km/h', ' kilometers per hour ')
+          .replaceAll('/', ' or ');
+    }
+
+    return cleaned
+        .replaceAll(RegExp(r'[\r\n]+'), '. ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  Future<void> speak(String text, {String langCode = 'en', double speed = 0.48}) async {
     if (_isPlaying && _currentSpeakingText == text) {
       await stop();
       return;
     }
+
+    await stop();
 
     _currentSpeakingText = text;
     _isPlaying = true;
@@ -70,25 +126,18 @@ class TtsService {
     currentTextNotifier.value = text;
 
     try {
-      try {
-        await _flutterTts.stop();
-      } catch (_) {}
-
       final voiceLang = _getVoiceLanguage(langCode);
       await _flutterTts.setLanguage(voiceLang);
       await _flutterTts.setSpeechRate(speed.clamp(0.2, 1.0));
+      await _flutterTts.setPitch(1.0);
 
-      // Remove markdown hashtags and asterisks for natural voice flow
-      final cleanedText = text
-          .replaceAll(RegExp(r'[*#_`>~]'), '')
-          .replaceAll(RegExp(r'\[.*?\]\(.*?\)'), '');
-
-      await _flutterTts.speak(cleanedText);
+      final preparedText = _prepareTextForSpeech(text, langCode);
+      await _flutterTts.speak(preparedText);
     } catch (e) {
       debugPrint('TTS speak engine note: $e');
-      // Maintain playing state so simulated test runs and devices without TTS engines remain consistent
-      _isPlaying = true;
-      isPlayingNotifier.value = true;
+      _isPlaying = false;
+      isPlayingNotifier.value = false;
+      currentTextNotifier.value = '';
     }
   }
 

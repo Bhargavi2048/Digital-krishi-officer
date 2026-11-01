@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../constants/api_constants.dart';
@@ -194,105 +194,146 @@ class WeatherService {
     final buffer = StringBuffer();
 
     if (langCode == 'ta') {
-      if (rainProb >= 50) {
-        buffer.writeln('இன்று மழை பெய்ய வாய்ப்பு அதிகம் ($rainProb%). வயலில் தேவையற்ற நீர்ப்பாசனத்தைத் தவிர்க்கவும்.');
-        buffer.writeln('முக்கிய அறிவிப்பு: $cropName பயிருக்கு பூச்சிக்கொல்லி மருந்து அல்லது உரமிடுதல் திட்டமிட்டிருந்தால், மழை மருந்தைக் கழுவிவிடக்கூடும் என்பதால் 24-48 மணி நேரம் தள்ளி வைக்கவும்.');
-      } else if (temp >= 35) {
-        buffer.writeln('அதிக வெப்பநிலை எச்சரிக்கை ($temp°C). $cropName பயிரில் ஈரப்பதம் குறைவதைத் தடுக்க அதிகாலை அல்லது மாலை வேளையில் லேசான நீர்ப்பாசனம் செய்யவும்.');
-        buffer.writeln('விவசாயக் குறிப்பு: வேர் மண்டல ஈரப்பதத்தைப் பாதுகாக்க இயற்கை மூடாக்கு (பயிர் கழிவுகள்) இடவும்.');
+      // 1. பாசன வழிகாட்டுதல்
+      if (rainProb >= 40) {
+        buffer.writeln('பாசன வழிகாட்டுதல்: இன்று மழை பெய்ய $rainProb சதவீதம் வாய்ப்புள்ளது. வயலில் தேவையற்ற பாசனத்தைத் தவிர்த்து நீர் சேமிக்கவும்.');
+      } else if (temp >= 33) {
+        buffer.writeln('பாசன வழிகாட்டுதல்: அதிகபட்ச வெப்பநிலை $temp டிகிரி செல்சியஸ் வரை உயர்ந்துள்ளதால், $cropName பயிரில் ஈரப்பதம் குறையாமல் இருக்க அதிகாலை அல்லது மாலை வேளையில் மிதமான பாசனம் செய்யவும்.');
       } else {
-        buffer.writeln('வானிலை வழக்கமான களப்பணிகள், உழவு மற்றும் பயிர் பராமரிப்புக்கு சாதகமாக உள்ளது.');
+        buffer.writeln('பாசன வழிகாட்டுதல்: இன்றைய மிதமான வானிலை வழக்கமான முறைப்படியான பாசனத்திற்கு ஏற்றதாக உள்ளது. பயிரின் வேர் மண்டலத்தில் சீரான ஈரப்பதத்தைப் பராமரிக்கவும்.');
       }
 
-      if (humidity >= 75) {
-        buffer.writeln('அதிக காற்று ஈரப்பதம் ($humidity%) பூஞ்சை நோய்களை (சாம்பல் நோய் மற்றும் இலைக்கருகல்) உருவாக்கலாம். பயிரின் கீழ் இலைகளைத் தீவிரமாகக் கண்காணிக்கவும்.');
+      // 2. பயிர் பாதுகாப்பு & உரமிடுதல்
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('பயிர் பாதுகாப்பு: மழை மற்றும் காற்றின் வேகம் காரணமாக $cropName பயிருக்கு பூச்சிக்கொல்லி மருந்து அல்லது இலைவழி உரமிடுவதை 24 முதல் 48 மணி நேரம் தள்ளி வைக்கவும்.');
+      } else {
+        buffer.writeln('பயிர் பாதுகாப்பு: இன்று நிலவும் சாதகமான வானிலையில் $cropName பயிருக்கு திட்டமிட்ட உரம் இடுதல், களை எடுத்தல் மற்றும் பூச்சி மேலாண்மை பணிகளை தாராளமாக மேற்கொள்ளலாம்.');
       }
 
-      if (windSpeed >= 20) {
-        buffer.writeln('வேகமான காற்று வீசுகிறது ($windSpeed கி.மீ/மணி). மருந்து தெளிப்பதைத் தவிர்க்கவும், இல்லையெனில் மருந்து காற்றில் விரயமாகும்.');
+      // 3. நோய் & பூச்சி தடுப்பு
+      if (humidity >= 65) {
+        buffer.writeln('நோய் தடுப்பு: காற்றின் ஈரப்பதம் $humidity சதவீதம் இருப்பதால் பூஞ்சை நோய்கள் மற்றும் இலைக்கருகல் தாக்க வாய்ப்புள்ளது. பயிரின் அடிப்பகுதி இலைகளைக் கவனமாக ஆய்வு செய்யவும்.');
+      } else {
+        buffer.writeln('நோய் தடுப்பு: பயிர்களில் சாறு உறிஞ்சும் பூச்சிகள் அல்லது இலைப்புள்ளி நோயின் ஆரம்ப அறிகுறிகள் உள்ளதா என்பதைத் தொடர்ந்து கண்காணிக்கவும்.');
       }
+
+      // 4. வடிகால் & களப்பணி
+      buffer.writeln('களப்பணி: வயல் வடிகால் வாய்க்கால்களைச் சுத்தமாக வைத்து பயிரின் வேர் அழுகலைத் தவிர்க்கவும்.');
     } else if (langCode == 'hi') {
-      if (rainProb >= 50) {
-        buffer.writeln('बारिश की संभावना अधिक है ($rainProb%)। आज फसलों की अनावश्यक सिंचाई से बचें।');
-        buffer.writeln('महत्वपूर्ण सूचना: यदि आपने $cropName पर कीटनाशक या खाद का छिड़काव तय किया है, तो बारिश के कारण दवा धुलने से बचाने के लिए इसे 24-48 घंटे टाल दें।');
-      } else if (temp >= 35) {
-        buffer.writeln('उच्च तापमान की चेतावनी ($temp°C)। $cropName में नमी बनाए रखने के लिए सुबह या शाम को हल्की सिंचाई करें।');
-        buffer.writeln('सलाह: जड़ों में नमी संरक्षण के लिए जैविक मल्चिंग का उपयोग करें।');
+      // 1. सिंचाई सलाह
+      if (rainProb >= 40) {
+        buffer.writeln('सिंचाई सलाह: आज बारिश की संभावना $rainProb प्रतिशत है। खेत में अनावश्यक सिंचाई से बचें और जल संरक्षण करें।');
+      } else if (temp >= 33) {
+        buffer.writeln('सिंचाई सलाह: तापमान $temp डिग्री सेल्सियस तक पहुँचने के कारण $cropName में नमी बनाए रखने के लिए सुबह या शाम को हल्की सिंचाई करें।');
       } else {
-        buffer.writeln('मौसम सामान्य कृषि कार्यों, निराई-गुड़ाई और कटाई के लिए पूरी तरह अनुकूल है।');
+        buffer.writeln('सिंचाई सलाह: आज का मौसम नियमित सिंचाई के लिए अनुकूल है। जड़ों में पर्याप्त नमी बनाए रखें।');
       }
 
-      if (humidity >= 75) {
-        buffer.writeln('हवा में उच्च आर्द्रता ($humidity%) से फफूंद जनित रोगों (झुलसा व पाउडरी मिल्ड्यू) का खतरा बढ़ सकता है। निचली पत्तियों की निगरानी करें।');
+      // 2. फसल सुरक्षा व छिड़काव
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('फसल सुरक्षा: बारिश या तेज हवा के कारण $cropName पर कीटनाशक या खाद का छिड़काव 24 से 48 घंटे के लिए टाल दें।');
+      } else {
+        buffer.writeln('फसल सुरक्षा: आज मौसम साफ रहने से $cropName में खाद डालने, निराई-गुड़ाई और कीट नियंत्रण के कार्य सुरक्षित रूप से किए जा सकते हैं।');
       }
 
-      if (windSpeed >= 20) {
-        buffer.writeln('तेज हवाएं ($windSpeed किमी/घंटा) चल रही हैं। पत्तों पर किसी भी प्रकार के छिड़काव से बचें।');
+      // 3. रोग निगरानी
+      if (humidity >= 65) {
+        buffer.writeln('रोग निगरानी: हवा में आर्द्रता $humidity प्रतिशत होने से फफूंद जनित रोगों और झुलसा रोग का खतरा है। निचली पत्तियों की जांच करें।');
+      } else {
+        buffer.writeln('रोग निगरानी: रस चूसक कीटों और पत्ती धब्बा रोग के लक्षणों की नियमित निगरानी करते रहें।');
       }
+
+      // 4. खेत प्रबंधन
+      buffer.writeln('खेत प्रबंधन: जलभराव से बचाव के लिए खेत की जल निकासी नालियों को साफ रखें।');
     } else if (langCode == 'te') {
-      if (rainProb >= 50) {
-        buffer.writeln('వర్షం కురిసే అవకాశం ఎక్కువగా ఉంది ($rainProb%). ఈ రోజు అనవసరపు నీటిపారుదలని నివారించండి.');
-        buffer.writeln('గమనిక: $cropName పై పురుగుమందులు లేదా ఎరువులు పిచికారీ చేయాలనుకుంటే 24-48 గంటలు వాయిదా వేయండి.');
-      } else if (temp >= 35) {
-        buffer.writeln('అధిక ఉష్ణోగ్రత హెచ్చరిక ($temp°C). తేమ తగ్గకుండా ఉదయం లేదా సాయంత్రం వేళల్లో తేలికపాటి నీరు పెట్టండి.');
+      if (rainProb >= 40) {
+        buffer.writeln('నీటిపారుదల సలహా: ఈ రోజు వర్షం కురిసే అవకాశం $rainProb శాతం ఉంది. అనవసరపు నీటిపారుదలని నివారించండి.');
+      } else if (temp >= 33) {
+        buffer.writeln('నీటిపారుదల సలహా: ఉష్ణోగ్రత $temp డిగ్రీల సెల్సియస్ ఉన్నందున $cropName పంటకు ఉదయం లేదా సాయంత్రం వేళల్లో తేలికపాటి నీరు పెట్టండి.');
       } else {
-        buffer.writeln('సాధారణ పంట పనులకు మరియు కోతలకు వాతావరణం అనుకూలంగా ఉంది.');
+        buffer.writeln('నీటిపారుదల సలహా: ప్రస్తుత వాతావరణం సాధారణ నీటిపారుదలకు అనుకూలంగా ఉంది. వేరు మండలంలో సరైన తేమను కాపాడండి.');
       }
-      if (humidity >= 75) {
-        buffer.writeln('అధిక తేమ ($humidity%) వల్ల శిలీంధ్ర వ్యాధులు వచ్చే అవకాశం ఉంది. దిగువ ఆకులను గమనించండి.');
+
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('పంట సంరక్షణ: $cropName పై పురుగుమందులు లేదా ఎరువుల పిచికారీని 24 నుండి 48 గంటలు వాయిదా వేయండి.');
+      } else {
+        buffer.writeln('పంట సంరక్షణ: $cropName పంటకు ఎరువులు వేయడం మరియు కలుపు తీత పనులను నిరభ్యంతరంగా చేపట్టవచ్చు.');
       }
-      if (windSpeed >= 20) {
-        buffer.writeln('ఈదురు గాలులు ($windSpeed కి.மீ/గం) వీస్తున్నాయి. స్ప్రేయింగ్ చేయవద్దు.');
+
+      if (humidity >= 65) {
+        buffer.writeln('వ్యాధి నివారణ: గాలిలో తేమ $humidity శాతం ఉన్నందున శిలీంధ్ర వ్యాధులు వచ్చే అవకాశం ఉంది. దిగువ ఆకులను పరిశీలించండి.');
+      } else {
+        buffer.writeln('వ్యాధి నివారణ: రసం పీల్చే పురుగుల ఉధృతిని గమనిస్తూ ఉండండి.');
       }
+
+      buffer.writeln('క్షేత్ర నిర్వహణ: మురుగు నీరు నిలవకుండా డ్రైనేజీ కాలువలను శుభ్రంగా ఉంచండి.');
     } else if (langCode == 'kn') {
-      if (rainProb >= 50) {
-        buffer.writeln('ಮಳೆಯ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ ($rainProb%). ಇಂದು ಬೆಳೆಗಳಿಗೆ ಅನಗತ್ಯ ನೀರಾವರಿಯನ್ನು ತಪ್ಪಿಸಿ.');
-        buffer.writeln('ಸೂಚನೆ: $cropName ಬೆಳೆಗೆ ಕೀಟನಾಶಕ ಸಿಂಪಡಣೆಯನ್ನು 24-48 ಗಂಟೆ ಮುಂದೂಡಿ.');
-      } else if (temp >= 35) {
-        buffer.writeln('ಹೆಚ್ಚಿನ ತಾಪಮಾನದ ಎಚ್ಚರಿಕೆ ($temp°C). ತೇವಾಂಶ ಕಾಪಾಡಲು ಬೆಳಗಿನ ಜಾವ ಅಥವಾ ಸಂಜೆ ಲಘು ನೀರಾವರಿ ಮಾಡಿ.');
+      if (rainProb >= 40) {
+        buffer.writeln('ನೀರಾವರಿ ಸಲಹೆ: ಇಂದು ಮಳೆಯಾಗುವ ಸಾಧ್ಯತೆ $rainProb ಪ್ರತಿಶತ ಇದೆ. ಅನಗತ್ಯ ನೀರಾವರಿ ತಪ್ಪಿಸಿ.');
+      } else if (temp >= 33) {
+        buffer.writeln('ನೀರಾವರಿ ಸಲಹೆ: ತಾಪಮಾನ $temp ಡಿಗ್ರಿ ಸೆಲ್ಸಿಯಸ್ ಇರುವುದರಿಂದ $cropName ಬೆಳೆಗೆ ಬೆಳಿಗ್ಗೆ ಅಥವಾ ಸಂಜೆ ಲಘು ನೀರಾವರಿ ನೀಡಿ.');
       } else {
-        buffer.writeln('ಸಾಮಾನ್ಯ ಕೃಷಿ ಕೆಲಸಗಳಿಗೆ ಹವಾಮಾನ ಅನುಕೂಲಕರವಾಗಿದೆ.');
+        buffer.writeln('ನೀರಾವರಿ ಸಲಹೆ: ಇಂದಿನ ಹವಾಮಾನವು ನಿಯಮಿತ ನೀರಾವರಿಗೆ ಸೂಕ್ತವಾಗಿದೆ.');
       }
-      if (humidity >= 75) {
-        buffer.writeln('ಹೆಚ್ಚಿನ ತೇವಾಂಶ ($humidity%) ಶಿಲೀಂಧ್ರ ರೋಗಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ಎಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.');
+
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('ಬೆಳೆ ರಕ್ಷಣೆ: $cropName ಬೆಳೆಗೆ ಕೀಟನಾಶಕ ಅಥವಾ ಗೊಬ್ಬರ ಸಿಂಪಡಣೆಯನ್ನು 24 ರಿಂದ 48 ಗಂಟೆಗಳ ಕಾಲ ಮುಂದೂಡಿ.');
+      } else {
+        buffer.writeln('ಬೆಳೆ ರಕ್ಷಣೆ: $cropName ಬೆಳೆಗೆ ಗೊಬ್ಬರ ಹಾಕುವುದು ಮತ್ತು ಕಳೆ ಕೀಳುವ ಕೆಲಸವನ್ನು ಕೈಗೊಳ್ಳಬಹುದು.');
       }
-      if (windSpeed >= 20) {
-        buffer.writeln('ವೇಗದ ಗಾಳಿ ($windSpeed km/h) ಬೀಸುತ್ತಿದೆ. ಔಷಧ ಸಿಂಪಡಿಸಬೇಡಿ.');
+
+      if (humidity >= 65) {
+        buffer.writeln('ರೋಗ ನಿಯಂತ್ರಣ: ಗಾಳಿಯಲ್ಲಿ ತೇವಾಂಶ $humidity ಪ್ರತಿಶತ ಇರುವುದರಿಂದ ಶಿಲೀಂಧ್ರ ರೋಗಗಳ ಬಗ್ಗೆ ಎಚ್ಚರವಿರಲಿ.');
+      } else {
+        buffer.writeln('ರೋಗ ನಿಯಂತ್ರಣ: ಎಲೆ ತಿನ್ನುವ ಕೀಟಗಳ ಲಕ್ಷಣಗಳನ್ನು ಗಮನಿಸಿ.');
       }
+
+      buffer.writeln('ಕ್ಷೇತ್ರ ನಿರ್ವಹಣೆ: ಹೊಲದಲ್ಲಿ ನೀರು ನಿಲ್ಲದಂತೆ ಚರಂಡಿಗಳನ್ನು ಸ್ವಚ್ಛವಾಗಿಡಿ.');
     } else if (langCode == 'ml') {
-      if (rainProb >= 50) {
-        buffer.writeln('മഴയ്ക്ക് സാധ്യത കൂടുതലാണ് ($rainProb%). ഇന്ന് അനാവശ്യ ജലസೇചനം ഒഴിവാക്കുക.');
-        buffer.writeln('ശ്രദ്ധിക്കുക: $cropName വിളയിൽ കീടനാശിനി പ്രയോഗം 24-48 മണിക്കൂർ മാറ്റിവെക്കുക.');
-      } else if (temp >= 35) {
-        buffer.writeln('ഉയർന്ന താപനില മുന്നറിയിപ്പ് ($temp°C). ഈർപ്പം നിലനിർത്താൻ അതിരാവിലെയോ വൈകുന്നേരമോ നേരിയ നന നൽകുക.');
+      if (rainProb >= 40) {
+        buffer.writeln('ജലസേചന നിർദ്ദേശം: ഇന്ന് മഴയ്ക്ക് $rainProb ശതമാനം സാധ്യതയുണ്ട്. അനാവശ്യ നന ഒഴിവാക്കുക.');
+      } else if (temp >= 33) {
+        buffer.writeln('ജലസേചന നിർദ്ദേശം: ഉയർന്ന താപനിലയായതിനാൽ $cropName വിളയ്ക്ക് രാവിലെ അല്ലെങ്കിൽ വൈകുന്നേരം നന നൽകുക.');
       } else {
-        buffer.writeln('സാധാരണ കാർഷിക ജോലികൾക്ക് കാലാവസ്ഥ അനുകൂലമാണ്.');
+        buffer.writeln('ജലസേചന നിർദ്ദേശം: ഇന്നത്തെ കാലാവസ്ഥ സാധാരണ ജലസೇചനത്തിന് അനുയോജ്യമാണ്.');
       }
-      if (humidity >= 75) {
-        buffer.writeln('കൂടിയ ഈർപ്പം ($humidity%) കുമിൾ രോഗങ്ങൾക്ക് കാരണമാകാം. இലകൾ പരിശോധിക്കുക.');
+
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('വിള സംരക്ഷണം: $cropName വിളയിലെ കീടനാശിനി പ്രയോഗം 24 മുതൽ 48 മണിക്കൂർ വരെ മാറ്റിവെക്കുക.');
+      } else {
+        buffer.writeln('വിള സംരക്ഷണം: വളപ്രയോഗവും കള പറിക്കലും ഇന്ന് നടത്താവുന്നതാണ്.');
       }
-      if (windSpeed >= 20) {
-        buffer.writeln('ശക്തമായ കാറ്റ് ($windSpeed km/h) വീശുന്നു. സ്പ്രേ ചെയ്യുന്നത് ഒഴിവാക്കുക.');
+
+      if (humidity >= 65) {
+        buffer.writeln('രോഗ നിയന്ത്രണം: ഈർപ്പം $humidity ശതമാനം ഉള്ളതിനാൽ കുമിൾ രോഗങ്ങൾക്കെതിരെ ജാഗ്രത പാലിക്കുക.');
+      } else {
+        buffer.writeln('രോഗ നിയന്ത്രണം: കീടങ്ങളുടെ ആക്രമണം നിരീക്ഷിക്കുക.');
       }
+
+      buffer.writeln('ഫീൽഡ് മാനേജ്മെന്റ്: വെള്ളക്കെട്ട് ഒഴിവാക്കാൻ നീർവാർച്ചാ ചാലുകൾ വൃത്തിയാക്കുക.');
     } else {
       // English (default)
-      if (rainProb >= 50) {
-        buffer.writeln('Rain probability is high ($rainProb%). Avoid unnecessary irrigation today.');
-        buffer.writeln('Notice: If you planned pesticide or fertilizer spraying on $cropName, postpone it by 24-48 hours as rainfall will wash away chemicals and reduce efficacy.');
-      } else if (temp >= 35) {
-        buffer.writeln('High temperature alert ($temp°C). Ensure early morning or late evening light irrigation to prevent moisture stress in $cropName.');
-        buffer.writeln('Tip: Apply organic mulch on soil to conserve root zone moisture.');
+      if (rainProb >= 40) {
+        buffer.writeln('Irrigation Guidance: Rain probability is $rainProb%. Avoid scheduled irrigation to conserve water.');
+      } else if (temp >= 33) {
+        buffer.writeln('Irrigation Guidance: High temperature ($temp°C). Irrigate $cropName during early morning or evening hours to avoid moisture stress.');
       } else {
-        buffer.writeln('Weather conditions are favorable for regular intercultural operations and harvesting.');
+        buffer.writeln('Irrigation Guidance: Favorable weather for standard scheduled irrigation. Maintain uniform root zone moisture.');
       }
 
-      if (humidity >= 75) {
-        buffer.writeln('High atmospheric humidity ($humidity%) increases susceptibility to fungal diseases (mildew & blight). Inspect lower leaves.');
+      if (rainProb >= 40 || windSpeed >= 20) {
+        buffer.writeln('Crop Care: Postpone pesticide and foliar fertilizer spraying on $cropName by 24 to 48 hours to prevent wash-off.');
+      } else {
+        buffer.writeln('Crop Care: Weather conditions are ideal for top dressing, weeding, and pest management on $cropName.');
       }
 
-      if (windSpeed >= 20) {
-        buffer.writeln('Strong winds detected ($windSpeed km/h). Do not perform foliar dusting or spray operations to prevent chemical drift.');
+      if (humidity >= 65) {
+        buffer.writeln('Disease Vigilance: Atmospheric humidity ($humidity%) elevates fungal disease susceptibility. Inspect lower crop canopy.');
+      } else {
+        buffer.writeln('Disease Vigilance: Monitor foliage periodically for early signs of sucking pests or leaf spots.');
       }
+
+      buffer.writeln('Field Operations: Ensure drainage channels remain clear to prevent waterlogging around root zones.');
     }
 
     return buffer.toString().trim();

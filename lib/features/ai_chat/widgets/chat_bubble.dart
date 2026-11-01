@@ -9,7 +9,7 @@ import '../../../widgets/app_image_preview.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
-  final VoidCallback onSpeak;
+  final VoidCallback? onSpeak;
   final VoidCallback onSave;
   final VoidCallback? onRetry;
   final bool isSpeaking;
@@ -17,7 +17,7 @@ class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
     required this.message,
-    required this.onSpeak,
+    this.onSpeak,
     required this.onSave,
     this.onRetry,
     this.isSpeaking = false,
@@ -237,16 +237,17 @@ class ChatBubble extends StatelessWidget {
               padding: const EdgeInsets.only(left: 40, top: 4),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      isSpeaking ? Icons.volume_off : Icons.volume_up,
-                      size: 18,
-                      color: isSpeaking ? Colors.red : Colors.grey.shade600,
+                  if (onSpeak != null)
+                    IconButton(
+                      icon: Icon(
+                        isSpeaking ? Icons.volume_off : Icons.volume_up,
+                        size: 18,
+                        color: isSpeaking ? Colors.red : Colors.grey.shade600,
+                      ),
+                      tooltip: 'Speak Text',
+                      onPressed: onSpeak,
+                      visualDensity: VisualDensity.compact,
                     ),
-                    tooltip: 'Speak Text',
-                    onPressed: onSpeak,
-                    visualDensity: VisualDensity.compact,
-                  ),
                   IconButton(
                     icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
                     tooltip: 'Copy',

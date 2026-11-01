@@ -258,7 +258,7 @@ class Translations {
       'startHandsFree': 'Start Hands-Free Voice',
 
       // Weather & Advisory
-      'defaultAdvisory': 'Favorable field conditions today. Maintain scheduled irrigation and inspect foliage for early pest symptoms.',
+      'defaultAdvisory': 'Irrigation Guidance: Favorable weather for standard scheduled irrigation. Maintain uniform root zone moisture. Crop Care: Weather conditions are ideal for top dressing, weeding, and pest management. Disease Vigilance: Monitor foliage periodically for early signs of sucking pests or leaf spots. Field Operations: Ensure drainage channels remain clear to prevent waterlogging.',
       'Clear Sky': 'Clear Sky',
       'Partly Cloudy': 'Partly Cloudy',
       'Overcast': 'Overcast',
@@ -529,7 +529,7 @@ class Translations {
       'startHandsFree': 'தொடர் குரல் உரையாடலைத் தொடங்கு',
 
       // Weather & Advisory
-      'defaultAdvisory': 'இன்று வயல் பணிகள் மேற்கொள்ள வானிலை சாதகமாக உள்ளது. வழக்கமான பாசனத்தைப் பராமரித்து இலைகளில் பூச்சி அறிகுறிகள் உள்ளதா எனக் கண்காணிக்கவும்.',
+      'defaultAdvisory': 'பாசன வழிகாட்டுதல்: இன்றைய மிதமான வானிலை வழக்கமான முறைப்படியான பாசனத்திற்கு ஏற்றதாக உள்ளது. பயிர் பாதுகாப்பு: திட்டமிட்ட உரம் இடுதல் மற்றும் பூச்சி மேலாண்மை பணிகளை தாராளமாக மேற்கொள்ளலாம். நோய் தடுப்பு: பயிர்களில் சாறு உறிஞ்சும் பூச்சிகள் அல்லது இலைப்புள்ளி நோயின் ஆரம்ப அறிகுறிகள் உள்ளதா என்பதைத் தொடர்ந்து கண்காணிக்கவும். களப்பணி: வயல் வடிகால் வாய்க்கால்களைச் சுத்தமாக வைத்து பயிரின் வேர் அழுகலைத் தவிர்க்கவும்.',
       'Clear Sky': 'தெளிவான வானம்',
       'Partly Cloudy': 'பகுதி மேகமூட்டம்',
       'Overcast': 'முழு மேகமூட்டம்',
@@ -616,7 +616,7 @@ class Translations {
       'startHandsFree': 'हैंड्स-फ्री बातचीत शुरू करें',
 
       // Weather & Advisory
-      'defaultAdvisory': 'आज खेत के कार्यों के लिए मौसम अनुकूल है। नियमित सिंचाई जारी रखें और कीटों के लक्षणों की जांच करें।',
+      'defaultAdvisory': 'सिंचाई सलाह: आज का मौसम नियमित सिंचाई के लिए अनुकूल है। जड़ों में पर्याप्त नमी बनाए रखें। फसल सुरक्षा: आज मौसम साफ रहने से खाद डालने, निराई-गुड़ाई और कीट नियंत्रण के कार्य सुरक्षित रूप से किए जा सकते हैं। रोग निगरानी: रस चूसक कीटों और पत्ती धब्बा रोग के लक्षणों की नियमित निगरानी करते रहें। खेत प्रबंधन: जलभराव से बचाव के लिए खेत की जल निकासी नालियों को साफ रखें।',
       'Clear Sky': 'साफ आसमान',
       'Partly Cloudy': 'आंशिक रूप से बादल',
       'Overcast': 'घने बादल',
@@ -651,6 +651,9 @@ class Translations {
       'rainProb': 'వర్షం అవకాశం',
       'windSpeed': 'గాలి వేగం',
       'todayAdvisory': 'ఈరోజు వ్యవసాయ సలహా',
+      'listenAdvisory': 'వినండి',
+      'stopVoice': 'ఆపండి',
+      'defaultAdvisory': 'నీటిపారుదల సలహా: సాధారణ సాగు పనులకు వాతావరణం అనుకూలంగా ఉంది. నిర్ణీత నీటిపారుదల నిర్వహించండి. పంట సంరక్షణ: ఎరువుల యాజమాన్యం మరియు కలుపు నివారణ చర్యలు చేపట్టవచ్చు. తెగుళ్ల నివారణ: పంటలో రసం పీల్చే పురుగుల లేదా ఆకుమచ్చ తెగులు లక్షణాలను గమనించండి. క్షేత్ర నిర్వహణ: నీరు నిల్వ ఉండకుండా మురుగు కాలువలను శుభ్రపరచండి.',
       'loading': 'లోడ్ అవుతోంది...',
     },
     'kn': {
@@ -676,6 +679,9 @@ class Translations {
       'rainProb': 'ಮಳೆಯ ಸಂಭವನೀಯತೆ',
       'windSpeed': 'ಗಾಳಿಯ ವೇಗ',
       'todayAdvisory': 'ಇಂದಿನ ಕೃಷಿ ಸಲಹೆ',
+      'listenAdvisory': 'ಕೇಳಿ',
+      'stopVoice': 'ನಿಲ್ಲಿಸಿ',
+      'defaultAdvisory': 'ನೀರಾವರಿ ಸಲಹೆ: ಇಂದಿನ ಹವಾಮಾನ ಸಾಮಾನ್ಯ ನೀರಾವರಿಗೆ ಅನುಕೂಲಕರವಾಗಿದೆ. ಬೆಳೆ ಸಂರಕ್ಷಣೆ: ನಿಗದಿತ ರಸಗೊಬ್ಬರ ಮತ್ತು ಕೀಟ ನಿರ್ವಹಣಾ ಕಾರ್ಯಗಳನ್ನು ಕೈಗೊಳ್ಳಬಹುದು. ರೋಗ ತಡೆಗಟ್ಟುವಿಕೆ: ಬೆಳೆಗಳಲ್ಲಿ ಎಲೆ ಚುಕ್ಕೆ ರೋಗ ಮತ್ತು ರಸಹೀರುವ ಕೀಟಗಳ ಲಕ್ಷಣಗಳನ್ನು ಗಮನಿಸಿ. ಕ್ಷೇತ್ರ ನಿರ್ವಹಣೆ: ನೀರು ನಿಲ್ಲದಂತೆ ಬಸಿದು ಹೋಗುವ ಕಾಲುವೆಗಳನ್ನು ಸ್ವಚ್ಛವಾಗಿಡಿ.',
       'loading': 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
     },
     'ml': {
@@ -701,6 +707,9 @@ class Translations {
       'rainProb': 'മഴ സാധ്യത',
       'windSpeed': 'കാറ്റിന്റെ വേഗത',
       'todayAdvisory': 'ഇന്നത്തെ കാർഷിക നിർദ്ദേശം',
+      'listenAdvisory': 'കേൾക്കുക',
+      'stopVoice': 'നിർത്തുക',
+      'defaultAdvisory': 'ജലസേചന നിർദ്ദേശം: ഇന്നത്തെ കാലാവസ്ഥ സാധാരണ ജലസേചനത്തിന് അനുയോജ്യമാണ്. വിള സംരക്ഷണം: വളപ്രയോഗവും കള പറിക്കലും ഇന്ന് നടത്താവുന്നതാണ്. രോഗ നിയന്ത്രണം: കീടങ്ങളുടെ ആക്രമണം നിരീക്ഷിക്കുക. ഫീൽഡ് മാനേജ്മെന്റ്: വെള്ളക്കെട്ട് ഒഴിവാക്കാൻ നീർവാർച്ചാ ചാലുകൾ വൃത്തിയാക്കുക.',
       'loading': 'ലോഡുചെയ്യുന്നു...',
     },
   };

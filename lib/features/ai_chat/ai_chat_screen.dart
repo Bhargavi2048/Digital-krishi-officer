@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,14 +6,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/language_provider.dart';
-import '../../core/services/speech_service.dart';
-import '../../core/services/tts_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/app_image_preview.dart';
 import '../../core/utils/image_helper.dart';
 import '../../core/utils/camera_helper.dart';
 import 'widgets/chat_bubble.dart';
-import 'widgets/voice_input_sheet.dart';
 import 'chat_history_screen.dart';
 
 class AiChatScreen extends StatefulWidget {
@@ -39,14 +35,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
   // Selected chat communication language
   String? _selectedChatLanguage;
 
-  // Hands-free continuous conversational voice state
-  bool _isHandsFreeMode = false;
-  String _handsFreeStatus = 'idle'; // 'listening', 'thinking', 'speaking', 'idle'
-  String _lastHeardSpeech = '';
-  Timer? _silenceTimer;
-  final SpeechService _speech = SpeechService();
-  final TtsService _tts = TtsService();
-
   static const Map<String, String> _languages = {
     'en': 'English',
     'ta': 'தமிழ் (Tamil)',
@@ -67,132 +55,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   @override
   void dispose() {
-    _silenceTimer?.cancel();
-    _speech.stopListening();
-    _tts.stop();
-    _tts.onCompletion = null;
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _toggleHandsFreeMode() {
-    if (_isHandsFreeMode) {
-      _stopHandsFreeMode();
-    } else {
-      _startHandsFreeMode();
-    }
-  }
-
-  void _startHandsFreeMode() {
-    setState(() {
-      _isHandsFreeMode = true;
-      _handsFreeStatus = 'listening';
-      _lastHeardSpeech = '';
-    });
-    _startListeningLoop();
-  }
-
-  void _stopHandsFreeMode() {
-    _silenceTimer?.cancel();
-    _speech.stopListening();
-    _tts.stop();
-    _tts.onCompletion = null;
-    setState(() {
-      _isHandsFreeMode = false;
-      _handsFreeStatus = 'idle';
-      _lastHeardSpeech = '';
-    });
-  }
-
-  Future<void> _startListeningLoop() async {
-    if (!_isHandsFreeMode || !mounted) return;
-
-    final lang = Provider.of<LanguageProvider>(context, listen: false);
-    final activeLang = _selectedChatLanguage ?? lang.currentLanguageCode;
-
-    setState(() {
-      _handsFreeStatus = 'listening';
-      _lastHeardSpeech = '';
-    });
-
-    _speech.onStatusListener = (status) {
-      if (!_isHandsFreeMode || !mounted) return;
-      if ((status == 'done' || status == 'notListening') && _handsFreeStatus == 'listening') {
-        if (_lastHeardSpeech.trim().isNotEmpty) {
-          _submitHandsFreeQuery(_lastHeardSpeech.trim());
-        }
-      }
-    };
-
-    await _speech.startListening(
-      langCode: activeLang,
-      pauseFor: const Duration(seconds: 2),
-      listenFor: const Duration(seconds: 35),
-      onResult: (spokenText) {
-        if (!_isHandsFreeMode || !mounted) return;
-        setState(() {
-          _lastHeardSpeech = spokenText;
-        });
-
-        _silenceTimer?.cancel();
-        _silenceTimer = Timer(const Duration(milliseconds: 1400), () {
-          if (_isHandsFreeMode && mounted && _lastHeardSpeech.trim().isNotEmpty && _handsFreeStatus == 'listening') {
-            _submitHandsFreeQuery(_lastHeardSpeech.trim());
-          }
-        });
-      },
-    );
-  }
-
-  Future<void> _submitHandsFreeQuery(String queryText) async {
-    if (!_isHandsFreeMode || queryText.isEmpty || !mounted) return;
-
-    _silenceTimer?.cancel();
-    await _speech.stopListening();
-
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final lang = Provider.of<LanguageProvider>(context, listen: false);
-    final chat = Provider.of<ChatProvider>(context, listen: false);
-    final activeLang = _selectedChatLanguage ?? lang.currentLanguageCode;
-
-    setState(() {
-      _handsFreeStatus = 'thinking';
-    });
-
-    final aiResponse = await chat.sendMessage(
-      text: queryText,
-      profile: auth.currentUser,
-      langCode: activeLang,
-      isVoiceMessage: true,
-    );
-
-    _scrollToBottom();
-
-    if (!_isHandsFreeMode || !mounted) return;
-
-    if (aiResponse != null && aiResponse.trim().isNotEmpty) {
-      setState(() {
-        _handsFreeStatus = 'speaking';
-      });
-
-      _tts.onCompletion = () {
-        if (!_isHandsFreeMode || !mounted) return;
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (_isHandsFreeMode && mounted) {
-            _startListeningLoop();
-          }
-        });
-      };
-
-      await _tts.speak(aiResponse, langCode: activeLang);
-    } else {
-      Future.delayed(const Duration(seconds: 1), () {
-        if (_isHandsFreeMode && mounted) {
-          _startListeningLoop();
-        }
-      });
-    }
   }
 
   void _scrollToBottom() {
@@ -441,49 +306,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
           ],
         ),
         actions: [
-          // Hands-free continuous voice conversation toggle
-          IconButton(
-            tooltip: _isHandsFreeMode ? context.tr('handsFreeStop') : context.tr('startHandsFree'),
-            icon: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _isHandsFreeMode ? Colors.red.shade600 : const Color(0xFF2E7D32),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: _isHandsFreeMode
-                    ? [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.4),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        )
-                      ]
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _isHandsFreeMode ? Icons.mic_rounded : Icons.record_voice_over_rounded,
-                    size: 15,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _isHandsFreeMode ? 'LIVE' : 'VOICE',
-                    style: const TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            onPressed: _toggleHandsFreeMode,
-          ),
-
           // Compact AI language selector button
           PopupMenuButton<String>(
             tooltip: 'Select AI Language',
@@ -595,9 +417,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
       body: Column(
         children: [
-          // Continuous Hands-Free Conversational Voice Banner
-          if (_isHandsFreeMode)
-            _buildHandsFreeActiveBanner(context, _selectedChatLanguage ?? lang.currentLanguageCode),
           // Chat Messages List
           Expanded(
             child: ListView.builder(
@@ -608,7 +427,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 final msg = chat.messages[idx];
                 return ChatBubble(
                   message: msg,
-                  onSpeak: () => chat.speakMessage(msg.text, lang.currentLanguageCode),
                   onSave: () async {
                     final saved = await chat.saveAdviceToBookmarks(msg.text, 'Agricultural Advice');
                     if (context.mounted && saved) {
@@ -737,16 +555,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     onPressed: _showMediaPickerOptions,
                   ),
 
-                  // Voice recording button: Tap starts hands-free, long-press opens voice sheet
-                  IconButton(
-                    icon: Icon(
-                      _isHandsFreeMode ? Icons.mic : Icons.mic_none_rounded,
-                      color: _isHandsFreeMode ? Colors.red : Theme.of(context).colorScheme.primary,
-                    ),
-                    tooltip: _isHandsFreeMode ? context.tr('handsFreeStop') : context.tr('startHandsFree'),
-                    onPressed: _toggleHandsFreeMode,
-                  ),
-
                   // Text input
                   Expanded(
                     child: Container(
@@ -795,129 +603,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHandsFreeActiveBanner(BuildContext context, String currentLangCode) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    Color bannerBg;
-    IconData statusIcon;
-    String statusTitle;
-    Color statusColor;
-
-    switch (_handsFreeStatus) {
-      case 'listening':
-        bannerBg = isDark ? const Color(0xFF1B281D) : const Color(0xFFE8F5E9);
-        statusIcon = Icons.mic_rounded;
-        statusTitle = context.tr('handsFreeListening');
-        statusColor = const Color(0xFF2E7D32);
-        break;
-      case 'thinking':
-        bannerBg = isDark ? const Color(0xFF262010) : const Color(0xFFFFF8E1);
-        statusIcon = Icons.psychology_rounded;
-        statusTitle = context.tr('handsFreeThinking');
-        statusColor = const Color(0xFFF57F17);
-        break;
-      case 'speaking':
-        bannerBg = isDark ? const Color(0xFF102027) : const Color(0xFFE1F5FE);
-        statusIcon = Icons.volume_up_rounded;
-        statusTitle = context.tr('handsFreeSpeaking');
-        statusColor = const Color(0xFF0288D1);
-        break;
-      default:
-        bannerBg = isDark ? const Color(0xFF1B281D) : const Color(0xFFE8F5E9);
-        statusIcon = Icons.record_voice_over_rounded;
-        statusTitle = context.tr('handsFreeActive');
-        statusColor = const Color(0xFF2E7D32);
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: bannerBg,
-        border: Border(
-          bottom: BorderSide(
-            color: statusColor.withOpacity(0.4),
-            width: 1.5,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(statusIcon, color: statusColor, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        statusTitle,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : statusColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _languages[currentLangCode]?.split(' ').first ?? currentLangCode.toUpperCase(),
-                        style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: statusColor),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_lastHeardSpeech.isNotEmpty && _handsFreeStatus == 'listening')
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      '🗣️ $_lastHeardSpeech',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11.5, color: isDark ? Colors.white70 : Colors.black87),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: _stopHandsFreeMode,
-            icon: const Icon(Icons.stop_circle_rounded, size: 14),
-            label: Text(context.tr('handsFreeStop')),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              minimumSize: const Size(0, 32),
-              textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
         ],
