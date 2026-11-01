@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -111,6 +111,7 @@ CRITICAL INSTRUCTIONS:
     String? mimeType,
     bool isVideo = false,
     bool isJson = false,
+    List<Map<String, String>>? conversationHistory,
     void Function(String statusMessage)? onStatusUpdate,
   }) async {
     // 1. Check if Java Spring Boot backend is active
@@ -191,6 +192,15 @@ Please inspect the visual symptoms visible in the attached media thoroughly. Ans
         ]
       },
       'contents': [
+        if (conversationHistory != null && conversationHistory.isNotEmpty)
+          for (final prev in conversationHistory)
+            if ((prev['text'] ?? '').trim().isNotEmpty)
+              {
+                'role': prev['role'] == 'user' ? 'user' : 'model',
+                'parts': [
+                  {'text': prev['text']!.trim()}
+                ],
+              },
         {
           'role': 'user',
           'parts': parts,
@@ -203,10 +213,12 @@ Please inspect the visual symptoms visible in the attached media thoroughly. Ans
 
     final candidateModels = <String>{
       _model,
-      'gemini-flash-lite-latest',
-      'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite',
+      'gemini-3.8-flash',
+      'gemini-3.7-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
       'gemini-flash-latest',
+      'gemini-3.8-flash-lite-tts',
     }.toList();
 
     for (final modelName in candidateModels) {

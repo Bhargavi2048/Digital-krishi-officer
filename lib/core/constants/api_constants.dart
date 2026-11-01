@@ -1,9 +1,9 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+﻿import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   // Google Gemini API Base
   static const String geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  static const String defaultGeminiModel = 'gemini-flash-lite-latest';
+  static const String defaultGeminiModel = 'gemini-3.8-flash';
 
   // Java Spring Boot Backend Base URL
   static String get springBootBaseUrl {

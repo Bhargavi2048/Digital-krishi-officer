@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../core/storage/local_storage_service.dart';
 import '../core/services/gemini_service.dart';
@@ -137,6 +137,16 @@ class ChatProvider extends ChangeNotifier {
               ? (mediaName?.toLowerCase().endsWith('.mov') == true ? 'video/quicktime' : 'video/mp4')
               : ImageHelper.detectMimeType(mediaName ?? imagePath, effectiveBytes));
 
+      // Collect recent conversation turns for multi-turn conversational context
+      final prevTurns = _messages
+          .where((m) => m.id != userMsg.id && m.text.trim().isNotEmpty)
+          .map((m) => {
+                'role': m.isUser ? 'user' : 'model',
+                'text': m.text.trim(),
+              })
+          .toList();
+      final recentHistory = prevTurns.length > 6 ? prevTurns.sublist(prevTurns.length - 6) : prevTurns;
+
       final aiResponseText = await _gemini.askKrishiOfficer(
         prompt: userMsg.text,
         profile: profile,
@@ -145,6 +155,7 @@ class ChatProvider extends ChangeNotifier {
         imageBytes: effectiveBytes,
         mimeType: detectedMime,
         isVideo: isVideo,
+        conversationHistory: recentHistory,
         onStatusUpdate: (status) {
           _thinkingStatus = status;
           notifyListeners();
