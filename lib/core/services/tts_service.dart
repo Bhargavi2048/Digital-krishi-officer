@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class TtsService {
@@ -66,7 +66,9 @@ class TtsService {
         .replaceAll(RegExp(r'\[.*?\]\(.*?\)'), '')
         .replaceAll(RegExp(r'[\(\)]'), ' ')
         .replaceAll(':', ', ')
-        .replaceAll(';', ', ');
+        .replaceAll(';', ', ')
+        .replaceAll('₹', ' ')
+        .replaceAll(RegExp(r'^[ \t]*[-•*][ \t]+', multiLine: true), '. ');
 
     if (langCode == 'ta') {
       cleaned = cleaned

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:share_plus/share_plus.dart';
@@ -240,11 +240,11 @@ class ChatBubble extends StatelessWidget {
                   if (onSpeak != null)
                     IconButton(
                       icon: Icon(
-                        isSpeaking ? Icons.volume_off : Icons.volume_up,
-                        size: 18,
-                        color: isSpeaking ? Colors.red : Colors.grey.shade600,
+                        isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                        size: 20,
+                        color: isSpeaking ? Colors.red.shade600 : const Color(0xFF2E7D32),
                       ),
-                      tooltip: 'Speak Text',
+                      tooltip: isSpeaking ? 'Stop Voice' : 'Listen / Read Aloud Answer',
                       onPressed: onSpeak,
                       visualDensity: VisualDensity.compact,
                     ),

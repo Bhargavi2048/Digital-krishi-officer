@@ -1,4 +1,8 @@
+﻿import 'dart:async';
 import 'dart:typed_data';
+import '../../core/services/speech_service.dart';
+import '../../core/services/tts_service.dart';
+import 'widgets/voice_input_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -35,6 +39,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
   // Selected chat communication language
   String? _selectedChatLanguage;
 
+  // Voice speech recognition state
+  final SpeechService _speech = SpeechService();
+  bool _isVoiceListening = false;
+  Timer? _voiceSilenceTimer;
+
   static const Map<String, String> _languages = {
     'en': 'English',
     'ta': 'தமிழ் (Tamil)',
@@ -55,9 +64,92 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   @override
   void dispose() {
+    _voiceSilenceTimer?.cancel();
+    _speech.stopListening();
+    TtsService().stop();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleVoiceInput() async {
+    if (_isVoiceListening) {
+      await _stopAndSendVoiceQuery();
+    } else {
+      await _startVoiceInput();
+    }
+  }
+
+  Future<void> _startVoiceInput() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
+    final activeLang = _selectedChatLanguage ?? lang.currentLanguageCode;
+
+    final available = await _speech.init();
+    if (!available) {
+      _openVoiceInputSheet(activeLang);
+      return;
+    }
+
+    setState(() {
+      _isVoiceListening = true;
+    });
+
+    _speech.onStatusListener = (status) {
+      if (!mounted) return;
+      if ((status == 'done' || status == 'notListening') && _isVoiceListening) {
+        _voiceSilenceTimer?.cancel();
+        _stopAndSendVoiceQuery();
+      }
+    };
+
+    await _speech.startListening(
+      langCode: activeLang,
+      pauseFor: const Duration(seconds: 3),
+      listenFor: const Duration(seconds: 35),
+      onResult: (spokenText) {
+        if (!mounted || !_isVoiceListening) return;
+        setState(() {
+          _textController.text = spokenText;
+        });
+
+        _voiceSilenceTimer?.cancel();
+        _voiceSilenceTimer = Timer(const Duration(milliseconds: 1800), () {
+          if (mounted && _isVoiceListening && _textController.text.trim().isNotEmpty) {
+            _stopAndSendVoiceQuery();
+          }
+        });
+      },
+    );
+  }
+
+  Future<void> _stopAndSendVoiceQuery() async {
+    _voiceSilenceTimer?.cancel();
+    await _speech.stopListening();
+    if (!mounted) return;
+
+    setState(() {
+      _isVoiceListening = false;
+    });
+
+    final query = _textController.text.trim();
+    if (query.isNotEmpty) {
+      _handleSendMessage();
+    }
+  }
+
+  void _openVoiceInputSheet(String activeLang) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => VoiceInputSheet(
+        langCode: activeLang,
+        onTextReady: (query) {
+          _textController.text = query;
+          _handleSendMessage();
+        },
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -417,27 +509,43 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
       body: Column(
         children: [
-          // Chat Messages List
+          // Chat Messages List with Audio Readout State
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: chat.messages.length,
-              itemBuilder: (context, idx) {
-                final msg = chat.messages[idx];
-                return ChatBubble(
-                  message: msg,
-                  onSave: () async {
-                    final saved = await chat.saveAdviceToBookmarks(msg.text, 'Agricultural Advice');
-                    if (context.mounted && saved) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(context.tr('saveSuccess')), duration: const Duration(seconds: 2)),
-                      );
-                    }
+            child: ValueListenableBuilder<bool>(
+              valueListenable: TtsService().isPlayingNotifier,
+              builder: (context, isPlaying, _) {
+                final currentSpeaking = TtsService().currentTextNotifier.value;
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: chat.messages.length,
+                  itemBuilder: (context, idx) {
+                    final msg = chat.messages[idx];
+                    final isThisMsgSpeaking = isPlaying && currentSpeaking == msg.text;
+                    return ChatBubble(
+                      message: msg,
+                      isSpeaking: isThisMsgSpeaking,
+                      onSpeak: () {
+                        if (isThisMsgSpeaking) {
+                          TtsService().stop();
+                        } else {
+                          final activeLang = _selectedChatLanguage ?? lang.currentLanguageCode;
+                          TtsService().speak(msg.text, langCode: activeLang);
+                        }
+                      },
+                      onSave: () async {
+                        final saved = await chat.saveAdviceToBookmarks(msg.text, 'Agricultural Advice');
+                        if (context.mounted && saved) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(context.tr('saveSuccess')), duration: const Duration(seconds: 2)),
+                          );
+                        }
+                      },
+                      onRetry: idx == chat.messages.length - 1 && !msg.isUser
+                          ? () => chat.retryLastMessage(auth.currentUser, _selectedChatLanguage ?? lang.currentLanguageCode)
+                          : null,
+                    );
                   },
-                  onRetry: idx == chat.messages.length - 1 && !msg.isUser
-                      ? () => chat.retryLastMessage(auth.currentUser, lang.currentLanguageCode)
-                      : null,
                 );
               },
             ),
@@ -555,6 +663,25 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     onPressed: _showMediaPickerOptions,
                   ),
 
+                  // Voice recording button: Tap listens and auto-sends to bot
+                  IconButton(
+                    icon: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: _isVoiceListening ? Colors.red.withOpacity(0.18) : Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _isVoiceListening ? Icons.mic : Icons.mic_none_rounded,
+                        color: _isVoiceListening ? Colors.red.shade600 : Theme.of(context).colorScheme.primary,
+                        size: 22,
+                      ),
+                    ),
+                    tooltip: _isVoiceListening ? 'Listening... Tap to send now' : 'Speak to AI Officer (Voice Input)',
+                    onPressed: _toggleVoiceInput,
+                  ),
+
                   // Text input
                   Expanded(
                     child: Container(
@@ -574,9 +701,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _handleSendMessage(),
                         decoration: InputDecoration(
-                          hintText: (_attachedMediaBytes != null || _attachedMediaPath != null)
-                              ? 'Ask about this media, or tap send...'
-                              : context.tr('chatHint'),
+                          hintText: _isVoiceListening
+                              ? 'Listening in ${_shortLangNames[_selectedChatLanguage ?? lang.currentLanguageCode] ?? 'selected language'}... Speak your query'
+                              : ((_attachedMediaBytes != null || _attachedMediaPath != null)
+                                  ? 'Ask about this media, or tap send...'
+                                  : context.tr('chatHint')),
                           hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 12),
