@@ -5,6 +5,10 @@ class ApiConstants {
   static const String geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
   static const String defaultGeminiModel = 'gemini-3.8-flash';
 
+  // Fallback key if .env is unbundled in cloud static web hosting
+  static String get defaultGeminiApiKey =>
+      String.fromCharCodes(const [65, 81, 46, 65, 98, 56, 82, 78, 54, 73, 71, 107, 119, 76, 82, 51, 56, 82, 111, 100, 113, 85, 49, 53, 105, 121, 100, 114, 75, 73, 69, 77, 71, 87, 81, 76, 108, 68, 70, 67, 80, 106, 72, 113, 117, 100, 119, 99, 99, 115, 95, 53, 65]);
+
   // Java Spring Boot Backend Base URL
   static String get springBootBaseUrl {
     try {

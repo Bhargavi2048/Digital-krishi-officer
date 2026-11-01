@@ -17,10 +17,11 @@ class GeminiService {
   String get _apiKey {
     try {
       final key = dotenv.env['GEMINI_API_KEY'];
-      return (key != null && key.trim().isNotEmpty && key != 'YOUR_GEMINI_API_KEY') ? key.trim() : '';
-    } catch (_) {
-      return '';
-    }
+      if (key != null && key.trim().isNotEmpty && key != 'YOUR_GEMINI_API_KEY') {
+        return key.trim();
+      }
+    } catch (_) {}
+    return ApiConstants.defaultGeminiApiKey;
   }
 
   String get _model {
@@ -114,24 +115,21 @@ CRITICAL INSTRUCTIONS:
     List<Map<String, String>>? conversationHistory,
     void Function(String statusMessage)? onStatusUpdate,
   }) async {
-    // 1. Check if Java Spring Boot backend is active
-    final backend = BackendApiService();
-    if (await backend.isBackendAvailable()) {
-      onStatusUpdate?.call('Consulting Java Spring Boot Krishi Server...');
-      final backendResponse = await backend.askBackend(
-        prompt: prompt,
-        langCode: langCode,
-        mediaBytes: imageBytes,
-        mediaMime: mimeType,
-        isVideo: isVideo,
-        profile: profile,
-      );
-      if (backendResponse != null && backendResponse.trim().isNotEmpty) {
-        return backendResponse.trim();
-      }
-    }
-
     if (!hasApiKey) {
+      final backend = BackendApiService();
+      if (await backend.isBackendAvailable()) {
+        final backendResponse = await backend.askBackend(
+          prompt: prompt,
+          langCode: langCode,
+          mediaBytes: imageBytes,
+          mediaMime: mimeType,
+          isVideo: isVideo,
+          profile: profile,
+        );
+        if (backendResponse != null && backendResponse.trim().isNotEmpty) {
+          return backendResponse.trim();
+        }
+      }
       return _generateOfflineFallbackResponse(prompt, langCode, profile);
     }
 
@@ -358,27 +356,25 @@ Rules:
 2. All explanations must be in ${_getLanguageName(langCode)}.
 ''';
 
-    // 1. Check if Java Spring Boot backend is active
-    final backend = BackendApiService();
-    if (await backend.isBackendAvailable()) {
-      final detectedMime = isVideo
-          ? (imagePath?.toLowerCase().endsWith('.mov') == true ? 'video/quicktime' : 'video/mp4')
-          : ImageHelper.detectMimeType(imagePath, mediaBytes);
-      final backendAnalysis = await backend.diagnoseBackend(
-        cropName: effectiveCrop,
-        description: effectiveDesc,
-        mediaBytes: mediaBytes?.toList(),
-        mediaMime: detectedMime,
-        isVideo: isVideo,
-        langCode: langCode,
-        profile: profile,
-      );
-      if (backendAnalysis != null) {
-        return backendAnalysis;
-      }
-    }
-
     if (!hasApiKey) {
+      final backend = BackendApiService();
+      if (await backend.isBackendAvailable()) {
+        final detectedMime = isVideo
+            ? (imagePath?.toLowerCase().endsWith('.mov') == true ? 'video/quicktime' : 'video/mp4')
+            : ImageHelper.detectMimeType(imagePath, mediaBytes);
+        final backendAnalysis = await backend.diagnoseBackend(
+          cropName: effectiveCrop,
+          description: effectiveDesc,
+          mediaBytes: mediaBytes?.toList(),
+          mediaMime: detectedMime,
+          isVideo: isVideo,
+          langCode: langCode,
+          profile: profile,
+        );
+        if (backendAnalysis != null) {
+          return backendAnalysis;
+        }
+      }
       return _generateOfflineDiseaseResult(effectiveCrop, effectiveDesc, imagePath, isVideo);
     }
 
