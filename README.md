@@ -2,6 +2,8 @@
 > **Your AI-Powered Agricultural Assistant**
 > *AI-Based Farmer Query Support and Advisory System*
 
+
+Demo Link: "https://digital-krishi-officer-a647.onrender.com"
 ---
 
 ## 📖 Project Overview
